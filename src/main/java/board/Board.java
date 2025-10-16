@@ -188,7 +188,6 @@ public class Board {
 
     /**
      * Displays the current state of the board in the console.
-     * Shows # symbols on dark squares when empty, and pieces when occupied.
      */
     public void display() {
         System.out.println("\n   A  B  C  D  E  F  G  H");
@@ -199,7 +198,7 @@ public class Board {
             for (int col = 0; col < 8; col++) {
                 Piece piece = squares[row][col];
                 if (piece == null) {
-                    // Check if this is a dark square (when row + col is odd)
+                    // Check if this is a dark square (sum of row and col is odd)
                     if ((row + col) % 2 == 1) {
                         System.out.print("##|");
                     } else {
