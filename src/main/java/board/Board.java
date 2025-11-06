@@ -1,6 +1,7 @@
 package board;
 
 import pieces.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,8 @@ import java.util.List;
  * @author Chess Game
  * @version 1.0
  */
-public class Board {
+public class Board implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Piece[][] squares;
     private List<Piece> capturedPieces;
 

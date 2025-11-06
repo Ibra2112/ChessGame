@@ -1,6 +1,7 @@
 package pieces;
 
 import board.Position;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,8 @@ import java.util.List;
  * @author Chess Game
  * @version 1.0
  */
-public abstract class Piece {
+public abstract class Piece implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected boolean isWhite;
     protected Position position;
     protected boolean hasMoved;

@@ -1,12 +1,15 @@
 package board;
 
+import java.io.Serializable;
+
 /**
  * Represents a position on the chessboard using row and column coordinates.
  * 
  * @author Chess Game
  * @version 1.0
  */
-public class Position {
+public class Position implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int row;
     private int column;
 
