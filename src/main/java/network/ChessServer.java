@@ -280,7 +280,18 @@ public class ChessServer {
      */
     public static void main(String[] args) {
         int port = DEFAULT_PORT;
-        if (args.length > 0) {
+        
+        // Check for Heroku PORT environment variable first
+        String herokuPort = System.getenv("PORT");
+        if (herokuPort != null) {
+            try {
+                port = Integer.parseInt(herokuPort);
+                System.out.println("Using Heroku PORT: " + port);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid Heroku PORT. Using default port " + DEFAULT_PORT);
+            }
+        } else if (args.length > 0) {
+            // Fall back to command line argument
             try {
                 port = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {

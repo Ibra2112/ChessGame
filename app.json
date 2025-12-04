@@ -1,0 +1,12 @@
+{
+  "name": "Chess Game",
+  "description": "A complete chess game with GUI, AI player, and network multiplayer support",
+  "repository": "https://github.com/Ibra2112/ChessGame",
+  "keywords": ["chess", "java", "game", "multiplayer"],
+  "buildpacks": [
+    {
+      "url": "heroku/jvm"
+    }
+  ]
+}
+

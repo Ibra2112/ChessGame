@@ -39,4 +39,9 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Heroku
+.heroku/
 
+# Maven (if you add it later)
+target/
+pom.xml
