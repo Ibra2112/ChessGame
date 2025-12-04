@@ -1,0 +1,265 @@
+@startuml Chess Game Class Diagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam backgroundColor white
+
+' Core Classes
+class ChessGame {
+    +main(String[] args): void
+}
+
+class Game {
+    -board: Board
+    -whitePlayer: Player
+    -blackPlayer: Player
+    -isWhiteTurn: boolean
+    -gameOver: boolean
+    +Game()
+    +start(): void
+}
+
+' GUI Classes
+class ChessGUI {
+    -board: Board
+    -boardPanel: ChessBoardPanel
+    -historyPanel: GameHistoryPanel
+    -isWhiteTurn: boolean
+    -whiteAI: AIPlayer
+    -blackAI: AIPlayer
+    -networkClient: ChessClient
+    +ChessGUI()
+    -handleMove(Position, Position): void
+    -makeAIMove(): void
+}
+
+class ChessBoardPanel {
+    -board: Board
+    -squareSize: int
+    -flipBoard: boolean
+    +setBoard(Board): void
+    +paintComponent(Graphics): void
+}
+
+class GameHistoryPanel {
+    -moveHistory: List<String>
+    +addMove(MoveRecord, boolean): void
+}
+
+class MoveRecord {
+    -from: Position
+    -to: Position
+    +getFrom(): Position
+    +getTo(): Position
+}
+
+class GameState {
+    -board: Board
+    -isWhiteTurn: boolean
+    +getBoard(): Board
+}
+
+' Board Package
+class Board {
+    -squares: Piece[][]
+    -capturedPieces: List<Piece>
+    +getPiece(Position): Piece
+    +movePiece(Position, Position): boolean
+    +isCheck(boolean): boolean
+    +isCheckmate(boolean): boolean
+    +copy(): Board
+}
+
+class Position {
+    -row: int
+    -column: int
+    +getRow(): int
+    +getColumn(): int
+    +toAlgebraicNotation(): String
+}
+
+' Pieces Package
+abstract class Piece {
+    #isWhite: boolean
+    #position: Position
+    #hasMoved: boolean
+    +isWhite(): boolean
+    +getPosition(): Position
+    +{abstract} possibleMoves(Piece[][]): List<Position>
+    +{abstract} isValidMove(Position, Piece[][]): boolean
+    +{abstract} copy(): Piece
+}
+
+class Pawn extends Piece {
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+}
+
+class Rook extends Piece {
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+}
+
+class Knight extends Piece {
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+}
+
+class Bishop extends Piece {
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+}
+
+class Queen extends Piece {
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+}
+
+class King extends Piece {
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+}
+
+' Game Package
+class Player {
+    -isWhite: boolean
+    -name: String
+    +isWhite(): boolean
+    +makeMove(Board): Position[]
+    +choosePromotionPiece(): String
+}
+
+class AIPlayer extends Player {
+    -MAX_DEPTH: int
+    +makeMove(Board): Position[]
+    -findBestMove(Board): Move
+    -minimax(Board, int, boolean, int, int): int
+}
+
+class Move {
+    +from: Position
+    +to: Position
+}
+
+' Network Package
+class ChessServer {
+    -serverSocket: ServerSocket
+    -board: Board
+    -isWhiteTurn: boolean
+    +start(): void
+    -handleMove(NetworkMessage, boolean): void
+}
+
+class ChessClient {
+    -socket: Socket
+    -isWhitePlayer: boolean
+    +sendMove(Position, Position): void
+    +disconnect(): void
+}
+
+class NetworkMessage {
+    -type: MessageType
+    -from: Position
+    -to: Position
+    -board: Board
+    +getType(): MessageType
+}
+
+enum MessageType {
+    CONNECT
+    CONNECTED
+    MOVE
+    BOARD_UPDATE
+    GAME_OVER
+}
+
+' Inheritance
+ChessGUI --|> JFrame
+ChessBoardPanel --|> JPanel
+GameHistoryPanel --|> JPanel
+
+' Composition
+Game "1" *-- "1" Board
+Game "1" *-- "2" Player
+ChessGUI "1" *-- "1" Board
+ChessGUI "1" *-- "1" ChessBoardPanel
+ChessGUI "1" *-- "1" GameHistoryPanel
+ChessGUI "1" *-- "0..2" AIPlayer
+ChessGUI "1" *-- "0..1" ChessClient
+Board "1" *-- "0..64" Piece
+Board "1" *-- "*" Piece : capturedPieces
+Piece "1" *-- "1" Position
+MoveRecord "1" *-- "2" Position
+GameState "1" *-- "1" Board
+GameState "1" *-- "*" MoveRecord
+ChessServer "1" *-- "1" Board
+AIPlayer "1" *-- "*" Move
+NetworkMessage "1" *-- "0..1" Position : from
+NetworkMessage "1" *-- "0..1" Position : to
+NetworkMessage "1" *-- "0..1" Board
+NetworkMessage "1" *-- "1" MessageType
+
+' Dependencies
+Player ..> Board
+Player ..> Position
+AIPlayer ..> Board
+AIPlayer ..> Position
+Game ..> Board
+Game ..> Position
+ChessGUI ..> Board
+ChessGUI ..> Position
+ChessServer ..> Board
+ChessServer ..> NetworkMessage
+ChessClient ..> NetworkMessage
+
+' Packages
+package "board" {
+    Board
+    Position
+}
+
+package "pieces" {
+    Piece
+    Pawn
+    Rook
+    Knight
+    Bishop
+    Queen
+    King
+}
+
+package "game" {
+    Player
+    AIPlayer
+    Game
+    Move
+}
+
+package "gui" {
+    ChessGUI
+    ChessBoardPanel
+    GameHistoryPanel
+    MoveRecord
+    GameState
+}
+
+package "network" {
+    ChessServer
+    ChessClient
+    NetworkMessage
+    MessageType
+}
+
+note right of Piece
+    Abstract class defining
+    common behavior for all
+    chess pieces
+end note
+
+note right of AIPlayer
+    Uses Minimax algorithm
+    with Alpha-Beta pruning
+end note
+
+@enduml
+

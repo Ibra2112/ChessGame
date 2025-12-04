@@ -26,6 +26,7 @@ public class ChessBoardPanel extends JPanel {
     private Point dragOffset;
     private boolean isDragging;
     private MoveListener moveListener;
+    private boolean flipBoard;
     
     /**
      * Interface for handling moves.
@@ -49,6 +50,7 @@ public class ChessBoardPanel extends JPanel {
         this.squareSize = boardSize / 8;
         this.selectedSquare = null;
         this.isDragging = false;
+        this.flipBoard = false;
         
         setPreferredSize(new Dimension(boardSize, boardSize));
         setBackground(Color.GRAY);
@@ -115,7 +117,18 @@ public class ChessBoardPanel extends JPanel {
     }
     
     /**
+     * Sets whether the board should be flipped (for Black's perspective).
+     * 
+     * @param flipBoard true to flip the board, false for normal orientation
+     */
+    public void setFlipBoard(boolean flipBoard) {
+        this.flipBoard = flipBoard;
+        repaint();
+    }
+    
+    /**
      * Converts mouse coordinates to board position.
+     * Accounts for board flipping.
      * 
      * @param x mouse x coordinate
      * @param y mouse y coordinate
@@ -126,6 +139,11 @@ public class ChessBoardPanel extends JPanel {
         int row = y / squareSize;
         
         if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+            if (flipBoard) {
+                // Flip both row and column
+                row = 7 - row;
+                col = 7 - col;
+            }
             return new Position(row, col);
         }
         return null;
@@ -207,29 +225,40 @@ public class ChessBoardPanel extends JPanel {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
         // Draw squares
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                Color squareColor = (row + col) % 2 == 0 ? lightSquareColor : darkSquareColor;
+        for (int displayRow = 0; displayRow < 8; displayRow++) {
+            for (int displayCol = 0; displayCol < 8; displayCol++) {
+                // Calculate actual board position
+                int boardRow = flipBoard ? (7 - displayRow) : displayRow;
+                int boardCol = flipBoard ? (7 - displayCol) : displayCol;
+                
+                Color squareColor = (boardRow + boardCol) % 2 == 0 ? lightSquareColor : darkSquareColor;
                 g2d.setColor(squareColor);
-                g2d.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
+                g2d.fillRect(displayCol * squareSize, displayRow * squareSize, squareSize, squareSize);
                 
                 // Highlight selected square
-                if (selectedSquare != null && selectedSquare.getRow() == row && selectedSquare.getColumn() == col) {
-                    g2d.setColor(new Color(255, 255, 0, 100)); // Yellow highlight
-                    g2d.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
+                if (selectedSquare != null) {
+                    int selectedDisplayRow = flipBoard ? (7 - selectedSquare.getRow()) : selectedSquare.getRow();
+                    int selectedDisplayCol = flipBoard ? (7 - selectedSquare.getColumn()) : selectedSquare.getColumn();
+                    if (selectedDisplayRow == displayRow && selectedDisplayCol == displayCol) {
+                        g2d.setColor(new Color(255, 255, 0, 100)); // Yellow highlight
+                        g2d.fillRect(displayCol * squareSize, displayRow * squareSize, squareSize, squareSize);
+                    }
                 }
             }
         }
         
         // Draw pieces
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                Position pos = new Position(row, col);
+        for (int displayRow = 0; displayRow < 8; displayRow++) {
+            for (int displayCol = 0; displayCol < 8; displayCol++) {
+                // Calculate actual board position
+                int boardRow = flipBoard ? (7 - displayRow) : displayRow;
+                int boardCol = flipBoard ? (7 - displayCol) : displayCol;
+                Position pos = new Position(boardRow, boardCol);
                 Piece piece = board.getPiece(pos);
                 
                 if (piece != null && !(isDragging && draggedSquare != null && 
-                    draggedSquare.getRow() == row && draggedSquare.getColumn() == col)) {
-                    drawPiece(g2d, piece, col * squareSize, row * squareSize);
+                    draggedSquare.getRow() == boardRow && draggedSquare.getColumn() == boardCol)) {
+                    drawPiece(g2d, piece, displayCol * squareSize, displayRow * squareSize);
                 }
             }
         }
@@ -238,8 +267,11 @@ public class ChessBoardPanel extends JPanel {
         if (isDragging && draggedSquare != null) {
             Piece piece = board.getPiece(draggedSquare);
             if (piece != null && dragOffset != null) {
-                int x = (int) (draggedSquare.getColumn() * squareSize + dragOffset.getX() - squareSize / 2);
-                int y = (int) (draggedSquare.getRow() * squareSize + dragOffset.getY() - squareSize / 2);
+                // Calculate display position for dragged piece
+                int displayCol = flipBoard ? (7 - draggedSquare.getColumn()) : draggedSquare.getColumn();
+                int displayRow = flipBoard ? (7 - draggedSquare.getRow()) : draggedSquare.getRow();
+                int x = (int) (displayCol * squareSize + dragOffset.getX() - squareSize / 2);
+                int y = (int) (displayRow * squareSize + dragOffset.getY() - squareSize / 2);
                 drawPiece(g2d, piece, x, y);
             }
         }

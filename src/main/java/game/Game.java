@@ -31,30 +31,47 @@ public class Game {
     }
 
     /**
-     * Initializes the players by getting their names.
+     * Initializes the players by getting their names and AI preferences.
      */
     private void initializePlayers() {
         System.out.println("Welcome to Console Chess Game!");
         System.out.println("===============================");
         
-        System.out.print("Enter name for White player: ");
-        String whiteName = scanner.nextLine().trim();
-        if (whiteName.isEmpty()) {
-            whiteName = "White Player";
+        // White player setup
+        System.out.print("Is White player an AI? (y/n): ");
+        String whiteAIChoice = scanner.nextLine().trim().toLowerCase();
+        boolean whiteIsAI = whiteAIChoice.equals("y") || whiteAIChoice.equals("yes");
+        
+        if (whiteIsAI) {
+            this.whitePlayer = new AIPlayer(true, "AI (White)");
+        } else {
+            System.out.print("Enter name for White player: ");
+            String whiteName = scanner.nextLine().trim();
+            if (whiteName.isEmpty()) {
+                whiteName = "White Player";
+            }
+            this.whitePlayer = new Player(true, whiteName);
         }
         
-        System.out.print("Enter name for Black player: ");
-        String blackName = scanner.nextLine().trim();
-        if (blackName.isEmpty()) {
-            blackName = "Black Player";
-        }
+        // Black player setup
+        System.out.print("Is Black player an AI? (y/n): ");
+        String blackAIChoice = scanner.nextLine().trim().toLowerCase();
+        boolean blackIsAI = blackAIChoice.equals("y") || blackAIChoice.equals("yes");
         
-        this.whitePlayer = new Player(true, whiteName);
-        this.blackPlayer = new Player(false, blackName);
+        if (blackIsAI) {
+            this.blackPlayer = new AIPlayer(false, "AI (Black)");
+        } else {
+            System.out.print("Enter name for Black player: ");
+            String blackName = scanner.nextLine().trim();
+            if (blackName.isEmpty()) {
+                blackName = "Black Player";
+            }
+            this.blackPlayer = new Player(false, blackName);
+        }
         
         System.out.println("\nGame initialized!");
-        System.out.println("White: " + whiteName);
-        System.out.println("Black: " + blackName);
+        System.out.println("White: " + whitePlayer.getName() + (whiteIsAI ? " (AI)" : ""));
+        System.out.println("Black: " + blackPlayer.getName() + (blackIsAI ? " (AI)" : ""));
         System.out.println("\nEnter 'QUIT' at any time to exit the game.");
         System.out.println("Move format: FROM TO (e.g., E2 E4)");
     }
@@ -78,13 +95,28 @@ public class Game {
                 }
             }
             
-            Position[] move = currentPlayer.makeMove(board);
+            Position[] move;
+            
+            // Handle AI moves
+            if (currentPlayer instanceof AIPlayer) {
+                System.out.println(currentPlayer.getName() + " is thinking...");
+                move = currentPlayer.makeMove(board);
+            } else {
+                move = currentPlayer.makeMove(board);
+            }
             
             if (move == null) {
-                // Player wants to quit
-                System.out.println("Game ended by player choice.");
-                gameOver = true;
-                break;
+                // Player wants to quit (only for human players)
+                if (!(currentPlayer instanceof AIPlayer)) {
+                    System.out.println("Game ended by player choice.");
+                    gameOver = true;
+                    break;
+                } else {
+                    // AI has no legal moves (shouldn't happen, but handle gracefully)
+                    System.out.println("No legal moves available for " + currentPlayer.getName());
+                    gameOver = true;
+                    break;
+                }
             }
             
             Position from = move[0];

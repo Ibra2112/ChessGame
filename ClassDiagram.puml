@@ -1,0 +1,497 @@
+@startuml Chess Game Class Diagram
+
+!define PUBLIC +public
+!define PRIVATE -private
+!define PROTECTED #protected
+!define PACKAGE ~package
+
+' Core Classes
+class ChessGame {
+    +main(String[] args): void
+}
+
+class Game {
+    -board: Board
+    -whitePlayer: Player
+    -blackPlayer: Player
+    -isWhiteTurn: boolean
+    -gameOver: boolean
+    -scanner: Scanner
+    +Game()
+    -initializePlayers(): void
+    +start(): void
+    -checkPawnPromotion(Position, Player): void
+    -createPromotionPiece(String, boolean, Position): Piece
+    -displayGameState(): void
+    -getCapturedPiecesString(): String
+    +end(Player): void
+}
+
+' GUI Classes
+class ChessGUI {
+    -board: Board
+    -boardPanel: ChessBoardPanel
+    -historyPanel: GameHistoryPanel
+    -isWhiteTurn: boolean
+    -gameOver: boolean
+    -statusLabel: JLabel
+    -moveHistory: List<MoveRecord>
+    -boardHistory: List<Board>
+    -lightSquareColor: Color
+    -darkSquareColor: Color
+    -boardSize: int
+    -whiteAI: AIPlayer
+    -blackAI: AIPlayer
+    -whiteIsAI: boolean
+    -blackIsAI: boolean
+    -networkClient: ChessClient
+    -isNetworkMode: boolean
+    -isNetworkWhitePlayer: boolean
+    +ChessGUI()
+    -initializeBoard(): void
+    -initializeGUI(): void
+    -createMenuBar(): void
+    -showPlayerSelectionDialog(): void
+    -showComputerSideSelectionDialog(): void
+    -showNetworkConnectionDialog(): void
+    -connectToServer(String, int): void
+    -handleMove(Position, Position): void
+    -makeAIMove(): void
+    -applyNetworkMove(Position, Position): void
+    -updateStatusLabel(): void
+    -getPieceName(Piece): String
+    -undoMove(): void
+    -newGame(): void
+    -saveGame(): void
+    -loadGame(): void
+    -showSettings(): void
+    +main(String[]): void
+}
+
+class ChessBoardPanel {
+    -board: Board
+    -lightSquareColor: Color
+    -darkSquareColor: Color
+    -squareSize: int
+    -selectedSquare: Position
+    -draggedSquare: Position
+    -dragOffset: Point
+    -isDragging: boolean
+    -moveListener: MoveListener
+    -flipBoard: boolean
+    +ChessBoardPanel(Board, Color, Color, int)
+    +setMoveListener(MoveListener): void
+    +setBoard(Board): void
+    +setColors(Color, Color): void
+    +setBoardSize(int): void
+    +setFlipBoard(boolean): void
+    -getPositionFromPoint(int, int): Position
+    -handleMousePressed(MouseEvent): void
+    -handleMouseDragged(MouseEvent): void
+    -handleMouseReleased(MouseEvent): void
+    +paintComponent(Graphics): void
+    -drawPiece(Graphics2D, Piece, int, int): void
+    -getPieceSymbol(Piece): String
+    ..
+    interface MoveListener {
+        +onMove(Position, Position): void
+    }
+}
+
+class GameHistoryPanel {
+    -moveHistory: List<String>
+    -undoListener: Runnable
+    +addMove(MoveRecord, boolean): void
+    +removeLastMove(): void
+    +clear(): void
+    +setUndoListener(Runnable): void
+}
+
+class SettingsDialog {
+    -lightSquareColor: Color
+    -darkSquareColor: Color
+    -boardSize: int
+    -applied: boolean
+    +getLightSquareColor(): Color
+    +getDarkSquareColor(): Color
+    +getBoardSize(): int
+    +isApplied(): boolean
+}
+
+class MoveRecord {
+    -from: Position
+    -to: Position
+    -pieceType: String
+    -pieceIsWhite: boolean
+    -capturedPieceType: String
+    -capturedPieceIsWhite: boolean
+    +MoveRecord(Position, Position, Piece, Piece)
+    +getFrom(): Position
+    +getTo(): Position
+    +getPiece(): Piece
+    +getCapturedPiece(): Piece
+    -createPiece(String, boolean, Position): Piece
+}
+
+class GameState {
+    -board: Board
+    -isWhiteTurn: boolean
+    -moveHistory: List<MoveRecord>
+    +GameState(Board, boolean, List<MoveRecord>)
+    +getBoard(): Board
+    +isWhiteTurn(): boolean
+    +getMoveHistory(): List<MoveRecord>
+}
+
+' Board Package
+class Board {
+    -squares: Piece[][]
+    -capturedPieces: List<Piece>
+    +Board()
+    -initializeBoard(): void
+    +getPiece(Position): Piece
+    +movePiece(Position, Position): boolean
+    +isCheck(boolean): boolean
+    +isCheckmate(boolean): boolean
+    -findKing(boolean): Position
+    +display(): void
+    +getCapturedPieces(): List<Piece>
+    +getSquares(): Piece[][]
+    +copy(): Board
+}
+
+class Position {
+    -row: int
+    -column: int
+    +Position(int, int)
+    +Position(String)
+    +getRow(): int
+    +getColumn(): int
+    +toAlgebraicNotation(): String
+    +equals(Object): boolean
+    +hashCode(): int
+    +toString(): String
+}
+
+' Pieces Package
+abstract class Piece {
+    #isWhite: boolean
+    #position: Position
+    #hasMoved: boolean
+    +Piece(boolean, Position)
+    +isWhite(): boolean
+    +getPosition(): Position
+    +setPosition(Position): void
+    +hasMoved(): boolean
+    +{abstract} possibleMoves(Piece[][]): List<Position>
+    +{abstract} isValidMove(Position, Piece[][]): boolean
+    +{abstract} toString(): String
+    +{abstract} copy(): Piece
+}
+
+class Pawn {
+    +Pawn(boolean, Position)
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+    +toString(): String
+    +copy(): Piece
+}
+
+class Rook {
+    +Rook(boolean, Position)
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+    +toString(): String
+    +copy(): Piece
+}
+
+class Knight {
+    +Knight(boolean, Position)
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+    +toString(): String
+    +copy(): Piece
+}
+
+class Bishop {
+    +Bishop(boolean, Position)
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+    +toString(): String
+    +copy(): Piece
+}
+
+class Queen {
+    +Queen(boolean, Position)
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+    +toString(): String
+    +copy(): Piece
+}
+
+class King {
+    +King(boolean, Position)
+    +possibleMoves(Piece[][]): List<Position>
+    +isValidMove(Position, Piece[][]): boolean
+    +toString(): String
+    +copy(): Piece
+}
+
+' Game Package
+class Player {
+    -isWhite: boolean
+    -name: String
+    -scanner: Scanner
+    +Player(boolean, String)
+    +isWhite(): boolean
+    +getName(): String
+    +makeMove(Board): Position[]
+    +choosePromotionPiece(): String
+}
+
+class AIPlayer {
+    -MAX_DEPTH: int
+    -KING_VALUE: int
+    -QUEEN_VALUE: int
+    -ROOK_VALUE: int
+    -BISHOP_VALUE: int
+    -KNIGHT_VALUE: int
+    -PAWN_VALUE: int
+    +AIPlayer(boolean, String)
+    +makeMove(Board): Position[]
+    +choosePromotionPiece(): String
+    -findBestMove(Board): Move
+    -minimax(Board, int, boolean, int, int): int
+    -evaluateBoard(Board): int
+    -getPieceValue(Piece): int
+    -getPositionalBonus(Piece, int, int): int
+    -getAllLegalMoves(Board, boolean): List<Move>
+    -isLegalMove(Board, Position, Position, boolean): boolean
+    ..
+    class Move {
+        +from: Position
+        +to: Position
+        +Move(Position, Position)
+    }
+}
+
+' Network Package
+class ChessServer {
+    -serverSocket: ServerSocket
+    -whiteSocket: Socket
+    -blackSocket: Socket
+    -whiteOut: ObjectOutputStream
+    -blackOut: ObjectOutputStream
+    -whiteIn: ObjectInputStream
+    -blackIn: ObjectInputStream
+    -board: Board
+    -isWhiteTurn: boolean
+    -gameOver: boolean
+    -whiteThread: Thread
+    -blackThread: Thread
+    +ChessServer(int)
+    +start(): void
+    -handleClient(boolean): void
+    -handleMove(NetworkMessage, boolean): void
+    -sendBoardUpdate(): void
+    -closeConnections(): void
+    +getBoard(): Board
+    +main(String[]): void
+}
+
+class ChessClient {
+    -socket: Socket
+    -out: ObjectOutputStream
+    -in: ObjectInputStream
+    -isWhitePlayer: boolean
+    -connected: boolean
+    -listener: NetworkMessageListener
+    +ChessClient(String, int, NetworkMessageListener)
+    -listenForMessages(): void
+    +sendMove(Position, Position): void
+    +disconnect(): void
+    +isConnected(): boolean
+    +isWhitePlayer(): boolean
+    ..
+    interface NetworkMessageListener {
+        +onMoveReceived(Position, Position): void
+        +onBoardUpdate(boolean): void
+        +onBoardReceived(Board): void
+        +onGameOver(String): void
+        +onError(String): void
+        +onCheck(): void
+        +onCheckmate(): void
+        +onDisconnected(): void
+    }
+}
+
+class NetworkMessage {
+    -type: MessageType
+    -from: Position
+    -to: Position
+    -isWhiteTurn: boolean
+    -message: String
+    -isWhitePlayer: boolean
+    -board: Board
+    +NetworkMessage(MessageType)
+    +createMove(Position, Position): NetworkMessage
+    +createBoardUpdate(Board, boolean): NetworkMessage
+    +createGameOver(String): NetworkMessage
+    +createError(String): NetworkMessage
+    +getType(): MessageType
+    +getFrom(): Position
+    +getTo(): Position
+    +isWhiteTurn(): boolean
+    +getMessage(): String
+    +isWhitePlayer(): boolean
+    +setWhitePlayer(boolean): void
+    +getBoard(): Board
+    ..
+    enum MessageType {
+        CONNECT
+        CONNECTED
+        MOVE
+        BOARD_UPDATE
+        GAME_OVER
+        DISCONNECT
+        ERROR
+        TURN_SWITCH
+        CHECK
+        CHECKMATE
+    }
+}
+
+' Relationships - Inheritance
+ChessGUI --|> JFrame
+ChessBoardPanel --|> JPanel
+GameHistoryPanel --|> JPanel
+SettingsDialog --|> JDialog
+AIPlayer --|> Player
+Pawn --|> Piece
+Rook --|> Piece
+Knight --|> Piece
+Bishop --|> Piece
+Queen --|> Piece
+King --|> Piece
+Board ..|> Serializable
+Position ..|> Serializable
+Piece ..|> Serializable
+MoveRecord ..|> Serializable
+GameState ..|> Serializable
+NetworkMessage ..|> Serializable
+
+' Relationships - Composition/Aggregation
+Game "1" *-- "1" Board
+Game "1" *-- "2" Player
+ChessGUI "1" *-- "1" Board
+ChessGUI "1" *-- "1" ChessBoardPanel
+ChessGUI "1" *-- "1" GameHistoryPanel
+ChessGUI "1" *-- "0..2" AIPlayer
+ChessGUI "1" *-- "0..1" ChessClient
+ChessGUI "1" *-- "*" MoveRecord
+ChessGUI "1" *-- "*" Board : boardHistory
+ChessBoardPanel "1" *-- "1" Board
+GameState "1" *-- "1" Board
+GameState "1" *-- "*" MoveRecord
+MoveRecord "1" *-- "2" Position
+Board "1" *-- "64" Position : squares
+Board "1" *-- "*" Piece : capturedPieces
+Board "1" *-- "0..64" Piece : squares
+Piece "1" *-- "1" Position
+AIPlayer "1" *-- "*" Move
+Move "1" *-- "2" Position
+ChessServer "1" *-- "1" Board
+ChessServer "1" *-- "2" Socket
+ChessClient "1" *-- "1" Socket
+ChessClient "1" *-- "1" NetworkMessageListener
+NetworkMessage "1" *-- "0..1" Position : from
+NetworkMessage "1" *-- "0..1" Position : to
+NetworkMessage "1" *-- "0..1" Board
+NetworkMessage "1" *-- "1" MessageType
+
+' Relationships - Dependencies
+Player ..> Board : uses
+Player ..> Position : uses
+AIPlayer ..> Board : uses
+AIPlayer ..> Position : uses
+AIPlayer ..> Piece : uses
+Game ..> Board : uses
+Game ..> Position : uses
+Game ..> Piece : uses
+ChessGUI ..> Board : uses
+ChessGUI ..> Position : uses
+ChessGUI ..> Piece : uses
+ChessGUI ..> AIPlayer : uses
+ChessGUI ..> ChessClient : uses
+ChessBoardPanel ..> Board : uses
+ChessBoardPanel ..> Position : uses
+ChessBoardPanel ..> Piece : uses
+MoveRecord ..> Position : uses
+MoveRecord ..> Piece : uses
+GameState ..> Board : uses
+GameState ..> MoveRecord : uses
+ChessServer ..> Board : uses
+ChessServer ..> Position : uses
+ChessServer ..> Piece : uses
+ChessServer ..> NetworkMessage : uses
+ChessClient ..> Board : uses
+ChessClient ..> Position : uses
+ChessClient ..> NetworkMessage : uses
+
+' Package grouping
+package "board" {
+    Board
+    Position
+}
+
+package "pieces" {
+    Piece
+    Pawn
+    Rook
+    Knight
+    Bishop
+    Queen
+    King
+}
+
+package "game" {
+    Player
+    AIPlayer
+    Game
+}
+
+package "gui" {
+    ChessGUI
+    ChessBoardPanel
+    GameHistoryPanel
+    SettingsDialog
+    MoveRecord
+    GameState
+}
+
+package "network" {
+    ChessServer
+    ChessClient
+    NetworkMessage
+}
+
+note right of Piece
+    Abstract class defining
+    common behavior for all
+    chess pieces
+end note
+
+note right of AIPlayer
+    Uses Minimax algorithm
+    with Alpha-Beta pruning
+    for move selection
+end note
+
+note right of ChessServer
+    Hosts network games
+    and synchronizes state
+    between two clients
+end note
+
+@enduml
+

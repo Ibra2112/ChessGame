@@ -1,0 +1,344 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{media9} % For embedding videos
+
+\geometry{margin=1in}
+
+% Code listing style
+\lstset{
+    language=Java,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false
+}
+
+\title{Chess Game - Phase 2 Documentation}
+\author{Chess Game Project}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This document describes the Phase 2 implementation of the Chess Game project, which includes a complete Graphical User Interface (GUI) built using Java Swing. The GUI provides an interactive chess playing experience with full chess rule validation, move history tracking, and customizable board settings.
+
+\section{GUI Overview}
+
+The chess game GUI consists of several key components:
+
+\begin{itemize}
+    \item \textbf{Chessboard Panel}: An 8x8 grid displaying the chessboard with alternating light and dark squares
+    \item \textbf{Game History Panel}: Displays move history and captured pieces on the right side
+    \item \textbf{Status Bar}: Shows whose turn it is and check/checkmate status
+    \item \textbf{Menu Bar}: Provides access to game controls and settings
+\end{itemize}
+
+\subsection{Chessboard Display}
+
+The chessboard is displayed as an 8x8 grid with alternating light and dark squares. Each chess piece is represented using Unicode chess symbols:
+\begin{itemize}
+    \item White pieces: \textcolor{white}{\textcolor{black}{♔ ♕ ♖ ♗ ♘ ♙}} (King, Queen, Rook, Bishop, Knight, Pawn)
+    \item Black pieces: \textcolor{black}{♚ ♛ ♜ ♝ ♞ ♟} (King, Queen, Rook, Bishop, Knight, Pawn)
+\end{itemize}
+
+\subsection{Piece Movement}
+
+The GUI supports two methods of moving pieces:
+
+\begin{enumerate}
+    \item \textbf{Click-and-Move}: Click on a piece to select it (highlighted in yellow), then click on the destination square
+    \item \textbf{Drag-and-Drop}: Click and hold on a piece, drag it to the destination square, and release
+\end{enumerate}
+
+Both methods provide the same functionality and are fully validated according to chess rules.
+
+\section{Chess Rules Implementation}
+
+The GUI enforces all standard chess rules:
+
+\subsection{Piece Movement Validation}
+
+Each piece can only move according to its specific movement rules:
+\begin{itemize}
+    \item \textbf{Pawn}: Moves forward one square (two squares from starting position), captures diagonally
+    \item \textbf{Rook}: Moves horizontally or vertically any number of squares
+    \item \textbf{Knight}: Moves in an L-shape (two squares in one direction, one square perpendicular)
+    \item \textbf{Bishop}: Moves diagonally any number of squares
+    \item \textbf{Queen}: Combines rook and bishop movement (any direction)
+    \item \textbf{King}: Moves one square in any direction
+\end{itemize}
+
+Invalid moves are rejected with error messages explaining why the move is not allowed.
+
+\subsection{Check and Checkmate Detection}
+
+The game detects and displays:
+\begin{itemize}
+    \item \textbf{Check}: When a king is under attack, the status bar displays "CHECK!"
+    \item \textbf{Checkmate}: When a player has no legal moves to escape check, a pop-up dialog declares the winner
+\end{itemize}
+
+Players cannot make moves that would put their own king in check, ensuring proper chess gameplay.
+
+\subsection{Capturing Pieces}
+
+When a piece moves to a square occupied by an opponent's piece:
+\begin{itemize}
+    \item The opponent's piece is removed from the board
+    \item The captured piece is displayed in the Game History Panel
+    \item The move is recorded in the move history
+\end{itemize}
+
+\section{Extra GUI Features}
+
+Three extra features have been implemented as required:
+
+\subsection{Feature 1: Menu Bar with Game Controls}
+
+The menu bar provides essential game management features:
+
+\subsubsection{New Game}
+\begin{itemize}
+    \item Resets the board to the initial starting position
+    \item Clears all move history and captured pieces
+    \item Confirms with the user before resetting to prevent accidental data loss
+\end{itemize}
+
+\subsubsection{Save Game}
+\begin{itemize}
+    \item Allows players to save the current game state to a file
+    \item Uses Java serialization to save:
+    \begin{itemize}
+        \item Complete board state (all piece positions)
+        \item Current player's turn
+        \item Full move history
+    \end{itemize}
+    \item Files are saved with a \texttt{.chess} extension
+    \item Provides file chooser dialog for selecting save location
+\end{itemize}
+
+\subsubsection{Load Game}
+\begin{itemize}
+    \item Restores a previously saved game from a file
+    \item Reconstructs the board, turn order, and move history
+    \item Updates all GUI components to reflect the loaded game state
+    \item Allows players to resume games exactly where they left off
+\end{itemize}
+
+\subsection{Feature 2: Settings Window for Customization}
+
+The Settings window allows players to customize the chessboard appearance:
+
+\subsubsection{Board Colors}
+\begin{itemize}
+    \item \textbf{Custom Colors}: Players can choose custom colors for light and dark squares using color pickers
+    \item \textbf{Preset Themes}: Three preset color schemes are available:
+    \begin{itemize}
+        \item \textbf{Classic}: Traditional beige and brown colors (240, 217, 181 / 181, 136, 99)
+        \item \textbf{Modern}: Green and cream colors (238, 238, 210 / 118, 150, 86)
+        \item \textbf{Gray}: Modern gray theme (220, 220, 220 / 140, 140, 140)
+    \end{itemize}
+    \item Changes are applied immediately when "Apply" is clicked
+\end{itemize}
+
+\subsubsection{Board Size}
+\begin{itemize}
+    \item Adjustable board size using a slider (400-800 pixels)
+    \item Real-time preview of selected size
+    \item Automatically adjusts piece sizes to maintain proportions
+\end{itemize}
+
+\subsection{Feature 3: Game History Panel with Undo Button}
+
+The Game History Panel provides comprehensive move tracking:
+
+\subsubsection{Move History}
+\begin{itemize}
+    \item Displays all moves in chronological order
+    \item Shows piece name, starting position, and destination position
+    \item Uses standard algebraic notation (e.g., "E2 E4")
+    \item Scrollable text area for long games
+\end{itemize}
+
+\subsubsection{Captured Pieces Display}
+\begin{itemize}
+    \item Shows captured pieces separately for White and Black
+    \item Displays Unicode symbols of captured pieces
+    \item Updates in real-time as pieces are captured
+\end{itemize}
+
+\subsubsection{Undo Functionality}
+\begin{itemize}
+    \item "Undo Move" button reverts the last move
+    \item Restores the board to the previous state
+    \item Restores captured pieces if applicable
+    \item Updates move history and status display
+    \item Maintains full undo history throughout the game
+\end{itemize}
+
+\section{Technical Implementation}
+
+\subsection{Architecture}
+
+The GUI is built using the Model-View-Controller (MVC) pattern:
+\begin{itemize}
+    \item \textbf{Model}: \texttt{Board} class manages game state
+    \item \textbf{View}: GUI components (\texttt{ChessBoardPanel}, \texttt{GameHistoryPanel}) display the game
+    \item \textbf{Controller}: \texttt{ChessGUI} handles user interactions and coordinates between components
+\end{itemize}
+
+\subsection{Key Classes}
+
+\begin{description}
+    \item[\texttt{ChessGUI}] Main window class that coordinates all GUI components
+    \item[\texttt{ChessBoardPanel}] Custom JPanel that renders the chessboard and handles mouse interactions
+    \item[\texttt{GameHistoryPanel}] Panel displaying move history and captured pieces
+    \item[\texttt{SettingsDialog}] Dialog window for board customization
+    \item[\texttt{GameState}] Serializable class for save/load functionality
+    \item[\texttt{MoveRecord}] Records individual moves for history tracking
+\end{description}
+
+\subsection{Serialization}
+
+For save/load functionality, the following classes implement \texttt{Serializable}:
+\begin{itemize}
+    \item \texttt{Board}
+    \item \texttt{Piece} (and all subclasses)
+    \item \texttt{Position}
+    \item \texttt{GameState}
+    \item \texttt{MoveRecord}
+\end{itemize}
+
+\section{Screenshots and Video Demonstration}
+
+\subsection{Screenshots}
+
+\textit{Note: Screenshots would be inserted here in the actual submission}
+
+\subsubsection{Figure 1: GUI at Start of Game}
+\textit{[Screenshot placeholder: Initial board setup with all pieces in starting positions]}
+
+\subsubsection{Figure 2: Gameplay with Captured Pieces}
+\textit{[Screenshot placeholder: Mid-game board with several moves made and pieces captured, showing captured pieces in history panel]}
+
+\subsubsection{Figure 3: Checkmate and Winner Declaration}
+\textit{[Screenshot placeholder: Checkmate position with pop-up dialog declaring the winner]}
+
+\subsubsection{Figure 4: Settings Window}
+\textit{[Screenshot placeholder: Settings dialog showing color customization and board size slider]}
+
+\subsubsection{Figure 5: Game History Panel}
+\textit{[Screenshot placeholder: Game History Panel showing move list and captured pieces]}
+
+\subsection{Video Demonstration}
+
+A screen recording demonstrating the chess game GUI in action is embedded below. The video shows:
+\begin{itemize}
+    \item Initial game setup and piece movement
+    \item Click-and-move and drag-and-drop functionality
+    \item Piece captures and move validation
+    \item Check and checkmate detection
+    \item Menu features (New Game, Save/Load)
+    \item Settings customization
+    \item Game History Panel and Undo functionality
+\end{itemize}
+
+% To embed a video, uncomment and modify the following:
+% Place your video file (MP4 format recommended) in the same directory as this .tex file
+% Then uncomment the lines below and replace "chess_game_demo.mp4" with your video filename
+
+% Method 1: Using media9 package (works with Adobe Reader and some PDF viewers)
+% \begin{center}
+% \includemedia[
+%   width=0.8\linewidth,
+%   height=0.45\linewidth,
+%   activate=pageopen,
+%   addresource=chess_game_demo.mp4,
+%   flashvars={source=chess_game_demo.mp4&autoPlay=false&loop=false}
+% ]{\fbox{\parbox{0.8\linewidth}{\centering Click here to play video demonstration}}}{VPlayer.swf}
+% \end{center}
+
+% Method 2: Alternative - Link to video (if embedding doesn't work)
+% \begin{center}
+% \href{run:chess_game_demo.mp4}{\fbox{\parbox{0.8\linewidth}{\centering Click here to play video demonstration (requires external player)}}}
+% \end{center}
+
+\textit{[Video placeholder: Screen recording of chess game demonstration]}
+
+\textbf{Note:} To embed your video:
+\begin{enumerate}
+    \item Record your screen using QuickTime (Mac), OBS, or similar software
+    \item Export the video as MP4 format
+    \item Place the video file in the same directory as this .tex file
+    \item Uncomment the video embedding code above and replace \texttt{chess\_game\_demo.mp4} with your filename
+    \item Compile the PDF - the video will be playable directly in the PDF viewer
+\end{enumerate}
+
+\section{Questions, Comments, and Explanations}
+
+\subsection{Design Decisions}
+
+\begin{itemize}
+    \item \textbf{Unicode Symbols}: Chess pieces are displayed using Unicode characters for simplicity and cross-platform compatibility, rather than loading image files.
+    
+    \item \textbf{Move Validation}: All moves are validated before execution, including checking if the move would put the player's own king in check. This ensures proper chess gameplay.
+    
+    \item \textbf{Undo Implementation}: The undo feature maintains a history of board states rather than just reversing moves, ensuring accuracy even with complex game situations.
+    
+    \item \textbf{Save/Load Format}: Binary serialization was chosen over text-based formats for efficiency and to preserve the complete game state accurately.
+\end{itemize}
+
+\subsection{Challenges and Solutions}
+
+\begin{itemize}
+    \item \textbf{Check Detection}: Implementing check detection required careful consideration of piece movement rules and board state. The solution uses a test board copy to simulate moves before applying them.
+    
+    \item \textbf{Drag-and-Drop}: Implementing smooth drag-and-drop while maintaining piece validation required careful handling of mouse events and coordinate conversion.
+    
+    \item \textbf{Serialization}: Making all game classes serializable while maintaining backward compatibility required careful design of the class hierarchy.
+\end{itemize}
+
+\subsection{Future Enhancements}
+
+Potential improvements for future versions:
+\begin{itemize}
+    \item Highlighting legal moves when a piece is selected
+    \item Sound effects for moves and captures
+    \item Timer functionality for timed games
+    \item Network multiplayer support
+    \item Opening book and move suggestions
+    \item Export game to PGN (Portable Game Notation) format
+\end{itemize}
+
+\section{Conclusion}
+
+The Phase 2 implementation successfully delivers a fully functional chess game GUI with:
+\begin{itemize}
+    \item Complete chess rule validation
+    \item Intuitive user interface with multiple interaction methods
+    \item Three comprehensive extra features
+    \item Robust save/load functionality
+    \item Professional appearance and user experience
+\end{itemize}
+
+The implementation follows object-oriented design principles and provides a solid foundation for future enhancements.
+
+\end{document}
+
