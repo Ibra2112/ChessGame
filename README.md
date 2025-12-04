@@ -338,7 +338,6 @@ This project is developed for educational purposes as part of CS 3354 course req
 - **Course**: CS 3354
 - **Section**: R01
 - **Semester**: Fall 2025
-- **Institution**: [Your Institution Name]
 
 ---
 
@@ -355,5 +354,3 @@ Potential features for future development:
 - Analysis mode
 
 ---
-
-*Last Updated: Fall 2025*
