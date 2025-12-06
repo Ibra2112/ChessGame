@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: chessgame-server
+    env: java
+    buildCommand: javac -d . -cp . src/main/java/board/*.java src/main/java/pieces/*.java src/main/java/utils/*.java src/main/java/game/*.java src/main/java/gui/*.java src/main/java/network/*.java src/main/java/ChessGame.java
+    startCommand: java -cp . network.ChessServer $PORT
+    envVars:
+      - key: PORT
+        value: 8888
+
